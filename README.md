@@ -91,3 +91,8 @@ UI Screenshots:
 ![Alt text](Screenshots/Pre_Play_Screen.png)
 ![Alt text](Screenshots/TVShows_Screen.png)
 ![Alt text](Screenshots/Episodes_Screen.png)
+
+
+As stated it looks different on an AndroidTV here is a pic of it running on mine:
+
+https://i.imgur.com/2YfomT6.jpeg
