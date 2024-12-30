@@ -30,6 +30,29 @@ Considering this app is using flutter it theoretically can support IOS, WEB, And
 Compiling this is simple, just setup android studio and flutter.
 
 Compile with the command "flutter build apk"
+
+
+## Setup
+
+1. Before running the app make sure you give the app storage permissions
+2. Make sure you have your TMDB, Orion, and Simkl api keys in the "Player_Files/apikeys" directory.
+
+so your directory should look like this:
+Player_Files/apikeys/orion_keys.txt
+Player_Files/apikeys/simkle_keys.txt
+Player_Files/apikeys/mdb_keys.txt
+
+inside each file you will place your api key for the respective service.
+for orion you will add this:
+orion_api_key = YOUR_API_KEY
+
+for simkle add this:
+simkl_client_Id = YOUR_API_KEY
+
+for TMDB add this:
+tmdb_api_key = YOUR_API_KEY
+
+
 ## Contributing
 
 Contributions are always welcome!
