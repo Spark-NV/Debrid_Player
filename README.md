@@ -35,7 +35,8 @@ Compile with the command "flutter build apk"
 ## Setup
 
 1. Before running the app make sure you give the app storage permissions
-2. Make sure you have your TMDB, Orion, and Simkl api keys in the "Player_Files/apikeys" directory.
+2. Install vlc
+3. Make sure you have your TMDB, Orion, and Simkl api keys in the "Player_Files/apikeys" directory.
 
 ### so your directory should look like this:
 
