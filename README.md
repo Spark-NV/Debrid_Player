@@ -37,6 +37,9 @@ Compile with the command "flutter build apk"
 1. Before running the app make sure you give the app storage permissions
 2. Install vlc
 3. Make sure you have your TMDB, Orion, and Simkl api keys in the "Player_Files/apikeys" directory.
+4. Start using Simkle and building your library. to start building a library find movies or shows and app it your "Plan to Watch" list. you can get a nice head start by finding someelses list and exporting it(a bunch of free sites for this) then re-import it in your control panel and make sure when you upload it to set it to add all imported items to your "plan to watch" after this you can start adding new movies as they come out or whatever.
+5. open app and authorize simkle and orion.
+6. select the button for download new movies, that will allow you to fetch all new movies/shows you add to your simkle plan to watch list.
 
 ### so your directory should look like this:
 
