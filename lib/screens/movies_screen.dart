@@ -246,7 +246,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
         children: [
           if (_selectedMovie != null) ...[
             SizedBox(
-              width: 280,
+              width: 275,
               child: Column(
                 children: [
                   Padding(
@@ -352,6 +352,21 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                           size: 20,
                                         ),
                                     ],
+                                  ),
+                                  subtitle: FutureBuilder<Map<String, dynamic>?>(
+                                    future: StorageService.instance.getMetadata(movie.tmdbId!),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData && snapshot.data?['release_date'] != null) {
+                                        return Text(
+                                          snapshot.data!['release_date'],
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[400],
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
                                   ),
                                   dense: true,
                                   visualDensity: VisualDensity.compact,
@@ -478,10 +493,27 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 1),
+                      Text(
+                        _selectedMovie!.title ?? 'Unknown Title',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _selectedMetadata!['release_date'] != null 
+                            ? 'Released: ${_selectedMetadata!['release_date']}'
+                            : 'Release Date: N/A',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
                       if (_selectedMetadata!['genres'] != null) ...[
                         Wrap(
-                          spacing: 8,
+                          spacing: 4,
                           children: [
                             for (var genre in (_selectedMetadata!['genres'] as List).take(2))
                               Chip(label: Text(genre['name'])),
