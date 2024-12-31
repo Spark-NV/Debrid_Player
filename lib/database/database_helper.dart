@@ -111,6 +111,8 @@ class DatabaseHelper {
   }
 
   Future<void> insertMovie(Movie movie) async {
+    if (movie.imdbId == null) return;
+    
     final db = await database;
     await db.insert(
       'movies',
@@ -129,11 +131,14 @@ class DatabaseHelper {
   }
 
   Future<void> insertMovies(List<Movie> movies) async {
+    final validMovies = movies.where((movie) => movie.imdbId != null).toList();
+    if (validMovies.isEmpty) return;
+    
     final db = await database;
     final batch = db.batch();
     final now = DateTime.now().toIso8601String();
     
-    for (var movie in movies) {
+    for (var movie in validMovies) {
       batch.insert(
         'movies',
         {
@@ -198,6 +203,8 @@ class DatabaseHelper {
   }
 
   Future<void> insertTvShow(TvShow show) async {
+    if (show.imdbId == null) return;
+    
     final db = await database;
     await db.insert(
       'tv_shows',
@@ -216,11 +223,14 @@ class DatabaseHelper {
   }
 
   Future<void> insertTvShows(List<TvShow> shows) async {
+    final validShows = shows.where((show) => show.imdbId != null).toList();
+    if (validShows.isEmpty) return;
+    
     final db = await database;
     final batch = db.batch();
     final now = DateTime.now().toIso8601String();
     
-    for (var show in shows) {
+    for (var show in validShows) {
       batch.insert(
         'tv_shows',
         {

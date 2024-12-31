@@ -34,7 +34,7 @@ class _SimklScreenState extends State<SimklScreen> {
   final FocusNode _downloadButtonFocusNode = FocusNode();
 
   DateTime? _lastSyncTime;
-  static const int _syncTimeoutMinutes = 20;
+  static const int _syncTimeoutMinutes = 1;
 
   String? _clientId;
 

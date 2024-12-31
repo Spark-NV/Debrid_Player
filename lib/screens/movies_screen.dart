@@ -9,6 +9,7 @@ import '../screens/settings_screen.dart';
 import '../screens/movie_details_screen.dart';
 import '../config/key_bindings.dart';
 import '../widgets/auto_scroll_text.dart';
+import '../widgets/horizontal_scroll_text.dart';
 
 class MoviesScreen extends StatefulWidget {
   const MoviesScreen({super.key});
@@ -29,6 +30,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
   final FocusNode _quickAccessFocusNode = FocusNode();
   final List<String> _alphabet = List.generate(26, (i) => String.fromCharCode(65 + i));
   bool _isQuickAccessFocused = false;
+  bool _isJumping = false;
+  String? _jumpingToLetter;
 
   @override
   void initState() {
@@ -122,26 +125,38 @@ class _MoviesScreenState extends State<MoviesScreen> {
     }
   }
 
-  void _jumpToLetter(String letter) {
-    final index = _movies.indexWhere((movie) => 
-      (movie.title ?? '').toUpperCase().startsWith(letter));
-    
-    if (index != -1) {
-      _scrollController.jumpTo(
-        index * 56.0,
-      );
+  Future<void> _jumpToLetter(String letter) async {
+    setState(() {
+      _isJumping = true;
+      _jumpingToLetter = letter;
+    });
+
+    try {
+      final index = _movies.indexWhere((movie) => 
+        (movie.title ?? '').toUpperCase().startsWith(letter));
+      
+      if (index != -1) {
+        _scrollController.jumpTo(
+          index * 56.0,
+        );
+        setState(() {
+          _selectedMovie = _movies[index];
+          _selectedIndex = index;
+          _isQuickAccessFocused = false;
+        });
+        
+        await _selectMovie(_movies[index], index);
+        
+        _quickAccessFocusNode.unfocus();
+        FocusScope.of(context).unfocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _listFocusNode.requestFocus();
+        });
+      }
+    } finally {
       setState(() {
-        _selectedMovie = _movies[index];
-        _selectedIndex = index;
-        _isQuickAccessFocused = false;
-      });
-      
-      _selectMovie(_movies[index], index);
-      
-      _quickAccessFocusNode.unfocus();
-      FocusScope.of(context).unfocus();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _listFocusNode.requestFocus();
+        _isJumping = false;
+        _jumpingToLetter = null;
       });
     }
   }
@@ -285,66 +300,65 @@ class _MoviesScreenState extends State<MoviesScreen> {
                             final movie = _movies[index];
                             final isSelected = movie.tmdbId == _selectedMovie?.tmdbId;
                             
-                            return Focus(
-                              focusNode: index == _selectedIndex ? _listFocusNode : null,
-                              onFocusChange: (hasFocus) {
-                                if (hasFocus) {
-                                  _selectMovie(movie, index);
-                                }
-                              },
-                              onKey: (node, event) {
-                                if (event is RawKeyDownEvent) {
-                                  if (KeyBindings.selectMedia.contains(event.logicalKey)) {
-                                    _onMoviePressed(movie);
-                                    return KeyEventResult.handled;
+                            return SizedBox(
+                              height: 56,
+                              child: Focus(
+                                focusNode: index == _selectedIndex ? _listFocusNode : null,
+                                onFocusChange: (hasFocus) {
+                                  if (hasFocus) {
+                                    _selectMovie(movie, index);
                                   }
-                                  if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                                    if (_sortMethod == SortMethod.alphabeticalAsc) {
-                                      setState(() {
-                                        _isQuickAccessFocused = true;
-                                        _quickAccessFocusNode.requestFocus();
-                                      });
+                                },
+                                onKey: (node, event) {
+                                  if (event is RawKeyDownEvent) {
+                                    if (KeyBindings.selectMedia.contains(event.logicalKey)) {
+                                      _onMoviePressed(movie);
+                                      return KeyEventResult.handled;
                                     }
-                                    return KeyEventResult.handled;
+                                    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                                      if (_sortMethod == SortMethod.alphabeticalAsc) {
+                                        setState(() {
+                                          _isQuickAccessFocused = true;
+                                          _quickAccessFocusNode.requestFocus();
+                                        });
+                                      }
+                                      return KeyEventResult.handled;
+                                    }
+                                    if (event.logicalKey == KeyBindings.popoutMenu) {
+                                      _showPopoutMenu(movie);
+                                      return KeyEventResult.handled;
+                                    }
                                   }
-                                  if (event.logicalKey == KeyBindings.popoutMenu) {
-                                    _showPopoutMenu(movie);
-                                    return KeyEventResult.handled;
-                                  }
-                                }
-                                return KeyEventResult.ignored;
-                              },
-                              child: ListTile(
-                                selected: isSelected,
-                                selectedTileColor: Colors.blue.withOpacity(0.3),
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        movie.title ?? 'Unknown Title',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  return KeyEventResult.ignored;
+                                },
+                                child: ListTile(
+                                  selected: isSelected,
+                                  selectedTileColor: Colors.blue.withOpacity(0.3),
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: HorizontalScrollText(
+                                          text: movie.title ?? 'Unknown Title',
+                                          textStyle: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    if (movie.isWatched) 
-                                      Icon(
-                                        Icons.check_circle, 
-                                        color: Colors.green, 
-                                        size: 20,
-                                      ),
-                                  ],
+                                      if (movie.isWatched) 
+                                        Icon(
+                                          Icons.check_circle, 
+                                          color: Colors.green, 
+                                          size: 20,
+                                        ),
+                                    ],
+                                  ),
+                                  dense: true,
+                                  visualDensity: VisualDensity.compact,
+                                  focusColor: Colors.blue.withOpacity(0.3),
+                                  hoverColor: Colors.blue.withOpacity(0.2),
+                                  onTap: () => _onMoviePressed(movie),
                                 ),
-                                subtitle: _selectedMetadata != null && isSelected
-                                    ? Text(
-                                        'Release Date: ${movie.releaseDate ?? 'Unknown'}',
-                                        style: const TextStyle(color: Colors.grey),
-                                      )
-                                    : null,
-                                focusColor: Colors.blue.withOpacity(0.3),
-                                hoverColor: Colors.blue.withOpacity(0.2),
-                                onTap: () => _onMoviePressed(movie),
                               ),
                             );
                           },
@@ -421,6 +435,26 @@ class _MoviesScreenState extends State<MoviesScreen> {
                 ),
                 if (_isLoading && _movies.isEmpty)
                   const Center(child: CircularProgressIndicator()),
+                if (_isJumping)
+                  Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Jumping to letter $_jumpingToLetter',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
